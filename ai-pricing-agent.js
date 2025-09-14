@@ -18,7 +18,7 @@ class ClaudePricingAgent {
       const prompt = this.buildPricingPrompt(worker, problem, estimatedHours, marketData);
       
       const response = await this.anthropic.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: CLAUDE_MODEL,
         max_tokens: 1000,
         temperature: 0.3,
         messages: [{
@@ -59,9 +59,9 @@ WORKER PROFILE:
 - Availability: ${worker.availability.join(', ')}
 
 CUSTOMER REQUEST:
-- Problem Description: "${problem.description}"
-- Urgency Level: ${problem.urgency}
-- Identified Trade Needs: ${problem.trades.map(t => `${t.trade} (${Math.round(t.confidence * 100)}% confidence)`).join(', ')}
+- Problem Description: "${problem.description || problem.summary || 'Service request'}"
+- Urgency Level: ${problem.urgency || 'flexible'}
+- Identified Trade Needs: ${problem.trades ? problem.trades.map(t => `${t.trade} (${Math.round(t.confidence * 100)}% confidence)`).join(', ') : worker.trade}
 - Estimated Duration: ${estimatedHours} hours
 
 MARKET CONDITIONS:
@@ -93,31 +93,40 @@ PRICING GUIDELINES:
 - Peak demand times: 10-20% premium
 - Complex/risky jobs: 15-30% premium
 
+CRITICAL JSON REQUIREMENTS:
+- Return ONLY valid JSON - no text before or after the JSON object
+- Start with { and end with }
+- Use proper JSON syntax: double quotes for strings, no trailing commas
+- All numeric values must be actual numbers, not strings
+- Arrays must use proper bracket notation
+
 RESPONSE FORMAT:
 Provide your pricing analysis in this exact JSON format:
 
 {
-  "total": [final price in dollars, integer],
-  "reasoning": "[2-3 sentences explaining your pricing logic]",
+  "total": 150,
+  "reasoning": "Base rate plus complexity adjustment for plumbing repair",
   "breakdown": {
-    "baseRate": [worker hourly rate],
-    "hours": [estimated hours],
-    "subtotal": [base rate × hours],
+    "baseRate": 75,
+    "hours": 2,
+    "subtotal": 150,
     "adjustments": [
       {
-        "factor": "[adjustment reason]",
-        "amount": [dollar amount, can be negative],
-        "percentage": [percentage change],
-        "rationale": "[why this adjustment]"
+        "factor": "Emergency surcharge",
+        "amount": 25,
+        "percentage": 15,
+        "rationale": "Same-day service premium"
       }
     ],
-    "travelFee": [travel fee if applicable],
-    "finalTotal": [total after all adjustments]
+    "travelFee": 0,
+    "finalTotal": 175
   },
-  "confidence": [0.0-1.0, how confident you are in this pricing],
+  "confidence": 0.85,
+  "needsMoreInfo": false,
+  "followUpQuestions": [],
   "alternatives": {
-    "budget": [lower price option],
-    "premium": [higher price option]
+    "budget": 125,
+    "premium": 200
   }
 }
 
@@ -170,37 +179,6 @@ Think through the pricing step by step, considering all factors. Be fair to both
     return 'Night';
   }
 
-  async calculatePriceWithContext(worker, problem, estimatedHours = 2, additionalContext = {}) {
-    const enhancedPrompt = `${this.buildPricingPrompt(worker, problem, estimatedHours)}
-
-ADDITIONAL CONTEXT:
-${additionalContext.marketConditions ? `- Market Conditions: ${additionalContext.marketConditions}` : ''}
-${additionalContext.seasonalFactors ? `- Seasonal Factors: ${additionalContext.seasonalFactors}` : ''}
-${additionalContext.competitorPricing ? `- Competitor Pricing: ${additionalContext.competitorPricing}` : ''}
-
-Consider these additional factors in your pricing decision. Adjust accordingly for maximum fairness and market competitiveness.`;
-
-    if (!this.anthropic) {
-      throw new Error('Claude AI is required for pricing analysis. Please configure ANTHROPIC_API_KEY.');
-    }
-
-    try {
-      const response = await this.anthropic.messages.create({
-        model: CLAUDE_MODEL,
-        max_tokens: 1200,
-        temperature: 0.2,
-        messages: [{
-          role: 'user',
-          content: enhancedPrompt
-        }]
-      });
-
-      return this.parsePricingResponse(response.content[0].text);
-    } catch (error) {
-      console.error('Claude enhanced pricing error:', error);
-      throw new Error(`Enhanced pricing analysis failed: ${error.message}. Claude AI is required for intelligent pricing.`);
-    }
-  }
 }
 
 module.exports = { ClaudePricingAgent };

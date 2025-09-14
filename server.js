@@ -28,6 +28,49 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
+// API endpoint for Claude problem analysis
+app.post('/api/analyze-problem', async (req, res) => {
+  try {
+    const { description, userLocation } = req.body;
+    
+    if (!description) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Description is required' 
+      });
+    }
+
+    // Check if API key is configured
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return res.status(500).json({
+        success: false,
+        error: 'ANTHROPIC_API_KEY is not configured. Please set your Claude API key in the .env file.',
+        code: 'API_KEY_MISSING'
+      });
+    }
+
+    // Initialize Claude matching agent
+    const matchingAgent = new ClaudeTradesMatchingAgent(process.env.ANTHROPIC_API_KEY);
+    
+    // Analyze the problem using Claude
+    const analysis = await matchingAgent.analyzeProblem(description, [], userLocation);
+    
+    res.json({
+      success: true,
+      analysis: analysis,
+      message: 'Problem analyzed successfully'
+    });
+    
+  } catch (error) {
+    console.error('Error analyzing problem:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to analyze problem',
+      details: error.message
+    });
+  }
+});
+
 // Demo database - In production, this would be MongoDB
 let workers = [
   {
@@ -233,127 +276,98 @@ class TradesMatchingAgent {
 const matchingAgent = new ClaudeTradesMatchingAgent(process.env.ANTHROPIC_API_KEY);
 const pricingAgent = new ClaudePricingAgent(process.env.ANTHROPIC_API_KEY);
 
-// Routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Chat API
-app.post('/api/chat', async (req, res) => {
-  const { message, conversationId } = req.body;
-  
-  let conversation = conversations.find(c => c.id === conversationId);
-  if (!conversation) {
-    conversation = {
-      id: conversationId || uuidv4(),
-      messages: [],
-      problem: null,
-      matches: []
-    };
-    conversations.push(conversation);
-  }
-
-  conversation.messages.push({
-    type: 'user',
-    content: message,
-    timestamp: new Date()
-  });
-
-  // Analyze the problem with Claude AI
-  const problem = await matchingAgent.analyzeProblem(message, [], null);
-  conversation.problem = problem;
-
-  let response = '';
-  let showMatches = false;
-
-  // Check if we need more information before proceeding
-  if (problem.needsMoreInfo && problem.followUpQuestions && problem.followUpQuestions.length > 0) {
-    // Ask follow-up questions to gather more details
-    response = `${problem.summary || 'I understand your situation.'}\n\nTo provide the best help, I need a few more details:\n\n${problem.followUpQuestions.map((q, i) => `${i + 1}. ${q}`).join('\n')}`;
+// API endpoint for problem analysis
+app.post('/api/analyze-problem', async (req, res) => {
+  try {
+    const { description, userLocation, conversationHistory = [] } = req.body;
     
-    // Add safety warnings if present
-    if (problem.safetyIssues && problem.safetyIssues.length > 0) {
-      response += `\n\n⚠️ **Safety Note**: ${problem.safetyIssues.join(', ')}`;
+    if (!description) {
+      return res.status(400).json({
+        success: false,
+        error: 'Problem description is required'
+      });
     }
-  } else if (!problem.needsMoreInfo && problem.confidence > 0.3 && problem.trades.length > 0) {
-    // Proceed with matching if we have enough information
-    const workerMatching = await matchingAgent.findWorkers(problem, workers, null, {});
+
+    console.log('Analyzing problem with Claude:', description);
+
+    // Use Claude matching agent for analysis
+    const analysis = await matchingAgent.analyzeProblem(description, [], userLocation);
     
-    // Calculate pricing with Claude AI for each matched worker
+    console.log('Claude analysis result:', JSON.stringify(analysis, null, 2));
+
+    res.json({
+      success: true,
+      analysis: analysis
+    });
+
+  } catch (error) {
+    console.error('Problem analysis error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// API endpoint for worker matching
+app.post('/api/find-workers', async (req, res) => {
+  try {
+    const { analysis, userLocation, preferences = {} } = req.body;
+    
+    if (!analysis) {
+      return res.status(400).json({
+        success: false,
+        error: 'Problem analysis is required'
+      });
+    }
+
+    console.log('Finding workers with Claude matching agent');
+
+    // Use Claude matching agent to find best workers
+    const workerMatching = await matchingAgent.findWorkers(analysis, workers, userLocation, preferences);
+    
+    console.log('Claude matching result:', JSON.stringify(workerMatching, null, 2));
+
+    // Calculate pricing for matched workers
     const matchesWithPricing = [];
     for (const worker of workerMatching.matches) {
       try {
-        const pricing = await pricingAgent.calculatePrice(worker, problem, problem.problemDetails?.timeEstimate ? parseFloat(problem.problemDetails.timeEstimate) : 2);
+        const estimatedHours = analysis.problemDetails?.timeEstimate ? 
+          parseFloat(analysis.problemDetails.timeEstimate.replace(/[^\d.]/g, '')) || 2 : 2;
+        
+        const pricing = await pricingAgent.calculatePrice(worker, analysis, estimatedHours);
         matchesWithPricing.push({
           ...worker,
           pricing: pricing
         });
       } catch (error) {
         console.error('Pricing error for worker:', worker.id, error);
-        matchesWithPricing.push({
-          ...worker,
-          pricing: { 
-            total: worker.hourlyRate * 2, 
-            source: 'fallback',
-            reasoning: 'Pricing calculation unavailable'
-          }
-        });
+        // No fallback - throw error if pricing fails
+        throw new Error(`Pricing calculation failed for worker ${worker.name}: ${error.message}`);
       }
     }
-    
-    conversation.matches = matchesWithPricing;
 
-    if (matchesWithPricing.length > 0) {
-      response = problem.summary || `Great! I found skilled ${problem.trades[0].trade} professionals. Let me show you the best matches for your needs.`;
-      showMatches = true;
-      
-      // Add material and time estimates if available
-      if (problem.problemDetails?.materialEstimate || problem.problemDetails?.timeEstimate) {
-        response += '\n\n📋 **Estimates:**';
-        if (problem.problemDetails.materialEstimate) {
-          response += `\n• Materials: ${problem.problemDetails.materialEstimate}`;
-        }
-        if (problem.problemDetails.timeEstimate) {
-          response += `\n• Time: ${problem.problemDetails.timeEstimate}`;
-        }
-      }
-    } else {
-      // Generate AI-powered response for no matches found
-      try {
-        const noMatchResponse = await matchingAgent.generateNoMatchResponse(problem);
-        response = noMatchResponse.response;
-      } catch (error) {
-        console.error('Error generating no match response:', error);
-        response = "I couldn't find suitable workers right now. Let me help you refine your request.";
-      }
-    }
-  } else {
-    // Generate AI-powered clarification questions
-    try {
-      const clarificationResponse = await matchingAgent.generateClarificationQuestions(message);
-      response = clarificationResponse.response;
-    } catch (error) {
-      console.error('Error generating clarification questions:', error);
-      response = "I'd like to help you better. Could you tell me more about what's happening?";
-    }
+    res.json({
+      success: true,
+      matches: matchesWithPricing,
+      summary: workerMatching.summary,
+      alternatives: workerMatching.alternatives
+    });
+
+  } catch (error) {
+    console.error('Worker matching error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
-
-  conversation.messages.push({
-    type: 'assistant',
-    content: response,
-    timestamp: new Date(),
-    showMatches: showMatches,
-    matches: showMatches ? conversation.matches : null
-  });
-
-  res.json({
-    response: response,
-    conversationId: conversation.id,
-    showMatches: showMatches,
-    matches: showMatches ? conversation.matches : null,
-    problem: problem
-  });
 });
+
+// Legacy chat API - removed to eliminate fallback cases
 
 // Get worker details
 app.get('/api/workers/:id', (req, res) => {

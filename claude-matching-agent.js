@@ -145,15 +145,17 @@ Think through this step-by-step:
 8. Can I proceed to matching or do I need critical information?
 
 IMPORTANT FOLLOW-UP RULES:
-- ONLY ask follow-up questions for:
+- ASK follow-up questions for:
   1. Safety issues (gas leaks, electrical sparking, flooding)
-  2. Very unclear problems (confidence < 0.6)
+  2. Unclear problems (confidence < 0.8)
+  3. Insufficient details for accurate pricing (leak severity, accessibility, materials needed)
+  4. Problems requiring diagnostic information (intermittent issues, multiple symptoms)
 - DO NOT ask about:
   1. Location (inferred from user profile)
   2. Timing/scheduling (handled in worker selection)
-  3. Minor clarifications if you have high confidence
-- If confidence >= 0.7 and no safety issues, set needsMoreInfo to false
+- If confidence >= 0.9 AND sufficient pricing details available, set needsMoreInfo to false
 - If you generate followUpQuestions, you MUST set needsMoreInfo to true
+- For pricing accuracy, ask about: problem severity, accessibility, previous attempts, visible damage
 
 Be thorough but practical in your analysis.`;
   }
