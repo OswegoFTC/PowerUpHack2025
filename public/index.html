@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerUs AI - Find Skilled Workers</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">⚡</div>
+                    <div>
+                        <h1 class="logo-text">PowerUs</h1>
+                        <p class="logo-tagline">Get things done</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Active Jobs Status -->
+            <div class="sidebar-status">
+                <div class="status-card">
+                    <div class="status-icon">📋</div>
+                    <div class="status-info">
+                        <div class="status-title">Active Jobs</div>
+                        <div class="status-count" id="sidebarActiveJobs">0</div>
+                        <div class="status-rating">⭐ 4.9 rating</div>
+                    </div>
+                    <div class="status-badge available">Available</div>
+                </div>
+                <div class="status-time">🕐 Last active: 2 min ago</div>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="nav-menu">
+                <a href="#" class="nav-link active" data-page="dashboard">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="#" class="nav-link" data-page="find-workers">
+                    <span class="nav-icon">🔍</span>
+                    <span class="nav-text">Find Workers</span>
+                </a>
+                <a href="#" class="nav-link" data-page="browse-workers">
+                    <span class="nav-icon">👷</span>
+                    <span class="nav-text">Browse Workers</span>
+                </a>
+                <a href="#" class="nav-link" data-page="profile">
+                    <span class="nav-icon">👤</span>
+                    <span class="nav-text">Profile</span>
+                </a>
+            </nav>
+            
+            <!-- Footer -->
+            <div class="sidebar-footer">
+                <div class="system-status">
+                    <div class="status-indicator online">🟢 System Online</div>
+                    <div class="ai-version">🤖 AI Powered v1.0.0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Dashboard Page -->
+            <div class="page active" id="dashboard-page">
+                <div class="page-header">
+                    <h1>Dashboard</h1>
+                </div>
+                
+                <!-- Stats Grid -->
+                <div class="dashboard-stats-grid">
+                    <div class="dashboard-stat-card">
+                        <div class="dashboard-stat-content">
+                            <div class="dashboard-stat-icon">📈</div>
+                            <div>
+                                <p class="stat-label">Active Jobs</p>
+                                <p class="stat-value" id="dashboardActiveJobs">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dashboard-stat-card">
+                        <div class="dashboard-stat-content">
+                            <div class="dashboard-stat-icon">💰</div>
+                            <div>
+                                <p class="stat-label">Total Spent</p>
+                                <p class="stat-value" id="dashboardTotalSpent">$0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dashboard-stat-card">
+                        <div class="dashboard-stat-content">
+                            <div class="dashboard-stat-icon">✅</div>
+                            <div>
+                                <p class="stat-label">Completed</p>
+                                <p class="stat-value" id="dashboardCompleted">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dashboard-stat-card">
+                        <div class="dashboard-stat-content">
+                            <div class="dashboard-stat-icon">⭐</div>
+                            <div>
+                                <p class="stat-label">Your Rating</p>
+                                <p class="stat-value">4.9</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Jobs -->
+                <div class="dashboard-card">
+                    <div class="dashboard-card-header">
+                        <h2 class="dashboard-card-title">Active Jobs</h2>
+                    </div>
+                    <div class="dashboard-card-content" id="activeJobsContainer">
+                        <div class="dashboard-empty-state">
+                            <p>No active jobs yet</p>
+                            <p class="text-sm">Start by finding workers for your projects</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent AI Matches -->
+                <div class="dashboard-card">
+                    <div class="dashboard-card-header">
+                        <h2 class="dashboard-card-title">Recent AI Matches</h2>
+                    </div>
+                    <div class="dashboard-card-content">
+                        <div class="dashboard-match-item">
+                            <div class="dashboard-match-avatar">
+                                <div class="dashboard-avatar-fallback">MT</div>
+                            </div>
+                            <div>
+                                <h3>Marcus Thompson</h3>
+                                <p>Master Electrician</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="rating">⭐ 4.8</div>
+                                <p class="text-sm">📍 1.2 mi • $85/hr</p>
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-match-item">
+                            <div class="dashboard-match-avatar">
+                                <div class="dashboard-avatar-fallback">RW</div>
+                            </div>
+                            <div>
+                                <h3>Rick Williams</h3>
+                                <p>Licensed Plumber</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="rating">⭐ 4.7</div>
+                                <p class="text-sm">📍 2.8 mi • $75/hr</p>
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-match-item">
+                            <div class="dashboard-match-avatar">
+                                <div class="dashboard-avatar-fallback">RT</div>
+                            </div>
+                            <div>
+                                <h3>Robert Taylor</h3>
+                                <p>Moving Helper</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="rating">⭐ 4.6</div>
+                                <p class="text-sm">📍 4.1 mi • $35/hr</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Find Workers Page -->
+            <div class="page" id="find-workers-page">
+                <div class="find-workers-header">
+                    <div class="page-title">
+                        <div class="title-icon">🔍</div>
+                        <div>
+                            <h1>AI Worker Finder</h1>
+                            <p>🔥</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Request Display -->
+                <div id="userRequestDisplay" class="user-request-display hidden">
+                    <div class="user-request-content">
+                        <span id="userRequestText"></span>
+                    </div>
+                </div>
+
+                <!-- Chat Interface -->
+                <div class="chat-container">
+                    <div class="chat-messages" id="findWorkersMessages">
+                        <div class="message assistant-message">
+                            <div class="message-avatar">
+                                <div class="avatar-icon">🔍</div>
+                            </div>
+                            <div class="message-content">
+                                <div class="message-bubble">
+                                    Hi! I'm your AI assistant for finding skilled workers. Tell me what you need help with and when!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Input -->
+                    <div class="chat-input-area">
+                        <div class="chat-input-container">
+                            <button class="chat-attachment-btn">+</button>
+                            <input type="text" id="findWorkersInput" class="chat-input" placeholder="Tell me what you need help with..." />
+                            <button id="findWorkersSendBtn" class="chat-send-btn">➤</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Book Your Service Page -->
+            <div class="page" id="book-service-page">
+                <div class="booking-header">
+                    <button class="back-btn">← Back</button>
+                    
+                    <div class="booking-title">
+                        <h1>Book Your Service</h1>
+                        <p>Step 1 of 3: Choose Worker & Time</p>
+                        
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 33.33%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="booking-subtitle">
+                        <div class="subtitle-icon">👥</div>
+                        <h2>Choose Worker & Schedule</h2>
+                        <p>Choose your automotive professional and schedule your appointment</p>
+                    </div>
+                </div>
+
+                <div class="worker-options">
+                    <!-- Best Match -->
+                    <div class="worker-card recommended">
+                        <div class="worker-info">
+                            <div class="worker-avatar">
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face" alt="Jake Roberts" />
+                            </div>
+                            <div class="worker-details">
+                                <div class="worker-header">
+                                    <h3>Jake Roberts</h3>
+                                    <span class="recommended-badge">🏆 Recommended</span>
+                                </div>
+                                <p class="worker-profession">Auto Mechanic</p>
+                                <p class="worker-description">Best match for your specific needs</p>
+                                
+                                <div class="worker-stats">
+                                    <div class="stat">⭐ 4.8 (167)</div>
+                                    <div class="stat">📍 3.2 mi</div>
+                                    <div class="stat">⏱️ 45 min</div>
+                                    <div class="stat">🔧 98 jobs</div>
+                                </div>
+                                
+                                <div class="worker-specialties">
+                                    <span class="specialty-tag">Car Repairs</span>
+                                    <span class="specialty-tag">Diagnostics</span>
+                                    <span class="specialty-tag">Maintenance</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="worker-booking">
+                            <div class="price-info">
+                                <div class="price">$273</div>
+                                <div class="price-label">Total cost</div>
+                            </div>
+                            <div class="schedule-info">
+                                <div class="schedule-time">📅 Tomorrow, 8:00 AM</div>
+                                <button class="book-btn">Book Now →</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fastest Available -->
+                    <div class="worker-card fastest">
+                        <div class="worker-info">
+                            <div class="worker-avatar">
+                                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face" alt="Danny Fix" />
+                            </div>
+                            <div class="worker-details">
+                                <div class="worker-header">
+                                    <h3>Danny Fix</h3>
+                                    <span class="fastest-badge">⚡ Fastest</span>
+                                </div>
+                                <p class="worker-profession">Mobile Mechanic</p>
+                                <p class="worker-description">Quickest response and earliest availability</p>
+                                
+                                <div class="worker-stats">
+                                    <div class="stat">⭐ 4.7 (134)</div>
+                                    <div class="stat">📍 2.1 mi</div>
+                                    <div class="stat">⏱️ 35 min</div>
+                                    <div class="stat fastest-stat">⚡ Earliest Slot</div>
+                                    <div class="stat">🔧 76 jobs</div>
+                                </div>
+                                
+                                <div class="worker-specialties">
+                                    <span class="specialty-tag">On-site Repairs</span>
+                                    <span class="specialty-tag">Car Door Fixes</span>
+                                    <span class="specialty-tag">Emergency</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="worker-booking">
+                            <div class="price-info">
+                                <div class="price">$213</div>
+                                <div class="price-label">Total cost</div>
+                            </div>
+                            <div class="schedule-info">
+                                <div class="schedule-time">📅 Today, 8:00 AM</div>
+                                <button class="book-btn">Book Now →</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Wait & Save -->
+                    <div class="worker-card wait-save">
+                        <div class="worker-info">
+                            <div class="worker-avatar">
+                                <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face" alt="Alex Turner" />
+                            </div>
+                            <div class="worker-details">
+                                <div class="worker-header">
+                                    <h3>Alex Turner</h3>
+                                    <span class="save-badge">💰 Wait & Save</span>
+                                </div>
+                                <p class="worker-profession">Automotive Technician</p>
+                                <p class="worker-description">Most affordable option • Save up to $78</p>
+                                
+                                <div class="worker-stats">
+                                    <div class="stat">⭐ 4.5 (91)</div>
+                                    <div class="stat">📍 4.1 mi</div>
+                                    <div class="stat">⏱️ 50 min</div>
+                                    <div class="stat">🔧 65 jobs</div>
+                                </div>
+                                
+                                <div class="worker-specialties">
+                                    <span class="specialty-tag">Engine Repair</span>
+                                    <span class="specialty-tag">Brakes</span>
+                                    <span class="specialty-tag">Electrical</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="worker-booking">
+                            <div class="price-info">
+                                <div class="price">$195</div>
+                                <div class="price-label">Total cost</div>
+                                <div class="price-savings">Lowest Price<br>Save $78</div>
+                            </div>
+                            <div class="schedule-info">
+                                <div class="schedule-time">📅 Tomorrow, 8:00 AM</div>
+                                <button class="book-btn">Book Now →</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Browse Workers Page -->
+            <div class="page" id="browse-workers-page">
+                <div class="page-header">
+                    <h1>Browse Workers</h1>
+                </div>
+                <div class="workers-grid" id="workersGrid">
+                    <!-- Workers will be populated here -->
+                </div>
+            </div>
+
+            <!-- Profile Page -->
+            <div class="page" id="profile-page">
+                <div class="page-header">
+                    <h1>Profile</h1>
+                </div>
+                <div class="profile-content">
+                    <div class="profile-card">
+                        <div class="profile-avatar">👤</div>
+                        <h3>John Doe</h3>
+                        <p>Customer since 2025</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
