@@ -2,6 +2,8 @@
 
 PowerUs AI is a modern web platform that connects customers with skilled tradespeople using advanced AI-powered problem analysis and worker matching.
 
+UX Demo: https://www.figma.com/make/BbVkk14YdwpI41cFpwdP5J/PowerUs-User-Side?node-id=0-1&p=f&fullscreen=1
+
 ## 🚀 Features
 
 - **AI-Powered Chat Interface** - Conversational problem diagnosis with Claude AI
